@@ -63,7 +63,7 @@ def main():
         # Define the paths to reference images for each defect type
         dataset_directory = 'NEU Metal Surface Defects Data/train'
         defect_folders = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
-        
+
         reference_image_paths = []
         for defect_folder in defect_folders:
             folder_path = os.path.join(dataset_directory, defect_folder)
