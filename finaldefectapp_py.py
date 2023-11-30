@@ -42,10 +42,15 @@ def calculate_ssim(reference_image, uploaded_image_path):
     reference_gray = reference_gray.astype(np.float64)
     uploaded_gray = uploaded_gray.astype(np.float64)
     
+    # Ensure images have the same shape
+    if reference_gray.shape != uploaded_gray.shape:
+        raise ValueError("Reference and uploaded images must have the same shape.")
+    
     # Calculate SSIM
     index, _ = ssim(reference_gray, uploaded_gray, full=True)
     
     return index
+
 
 
 # Function to assess the highest probability predicted and print out the class of the image
