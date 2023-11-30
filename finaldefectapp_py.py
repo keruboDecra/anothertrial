@@ -38,10 +38,15 @@ def calculate_ssim(reference_image, uploaded_image_path):
     # Convert the resized image to grayscale
     uploaded_gray = color.rgb2gray(uploaded_img[0])
     
+    # Convert images to float64
+    reference_gray = reference_gray.astype(np.float64)
+    uploaded_gray = uploaded_gray.astype(np.float64)
+    
     # Calculate SSIM
     index, _ = ssim(reference_gray, uploaded_gray, full=True)
     
     return index
+
 
 # Function to assess the highest probability predicted and print out the class of the image
 def assess_defect(prediction, classes):
