@@ -3,6 +3,7 @@ import streamlit as st
 import os
 from pathlib import Path
 from keras.preprocessing import image
+from keras.models import load_model  # Import load_model
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
 from PIL import Image
@@ -63,27 +64,17 @@ def main():
         st.write(f"SSIM with the reference image: {ssim_value}")
 
         # Set a threshold for SSIM
-        ssim_threshold = 0.4  # Adjust the threshold as needed
+        ssim_threshold = 1.0  # Adjust the threshold as needed
 
-        if ssim_value > ssim_threshold:
+        if ssim_value >= ssim_threshold:
             # Continue with defect assessment
 
-            # Create a temporary directory if it doesn't exist
-            temp_dir = 'temp'
-            os.makedirs(temp_dir, exist_ok=True)
-
-            # Create a path for the temporary image
-            temp_path = os.path.join(temp_dir, 'temp_image.jpg')
-            uploaded_file.seek(0)
-            with open(temp_path, 'wb') as f:
-                f.write(uploaded_file.read())
-
-            # Load the model
+            # Load the model only if the SSIM condition is met
             model = load_mobilenet_model()
 
             if model is not None:
                 # Make predictions
-                prediction = predict_defect(temp_path, model)
+                prediction = predict_defect(uploaded_file, model)
 
                 # Display the results
                 st.subheader("Prediction Results:")
