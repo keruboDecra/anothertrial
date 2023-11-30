@@ -18,7 +18,9 @@ def calculate_ssim(img_path, reference_image_paths):
     for reference_img in reference_image_paths:
         try:
             reference_img_array = np.array(Image.open(reference_img).convert('L'))
-            ssim_values.append(ssim(img_array, reference_img_array))
+            ssim_val = ssim(img_array, reference_img_array)
+            ssim_values.append(ssim_val)
+            st.write(f"SSIM with {reference_img}: {ssim_val}")
         except Exception as e:
             st.warning(f"Error calculating SSIM for {reference_img}: {str(e)}")
 
@@ -59,7 +61,6 @@ def main():
     # Upload image through Streamlit
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "bmp"])
 
-
     if uploaded_file is not None:
         # Define the paths to reference images for each defect type
         dataset_directory = 'NEU Metal Surface Defects Data/train'
@@ -72,7 +73,7 @@ def main():
         st.write(f"Maximum SSIM with the reference images: {ssim_value}")
 
         # Set a threshold for SSIM
-        ssim_threshold = 0.03
+        ssim_threshold = 0.3
 
         if ssim_value >= ssim_threshold:
             # Continue with defect assessment
