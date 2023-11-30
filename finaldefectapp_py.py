@@ -12,10 +12,14 @@ def calculate_ssim(img_path, reference_img_path):
     img = Image.open(img_path).convert('L')  # Convert to grayscale
     reference_img = Image.open(reference_img_path).convert('L')
 
+    # Resize the reference image to match the dimensions of the uploaded image
+    img = img.resize(reference_img.size)
+
     img_array = np.array(img)
     reference_img_array = np.array(reference_img)
 
     return ssim(img_array, reference_img_array)
+
 
 # Function to load the trained MobileNet model
 def load_mobilenet_model():
