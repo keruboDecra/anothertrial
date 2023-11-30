@@ -20,7 +20,6 @@ def calculate_ssim(img_path, reference_img_path):
 
     return ssim(img_array, reference_img_array)
 
-
 # Function to load the trained MobileNet model
 def load_mobilenet_model():
     model_path = 'mobilenet_model (1).h5'
@@ -64,7 +63,7 @@ def main():
         st.write(f"SSIM with the reference image: {ssim_value}")
 
         # Set a threshold for SSIM
-        ssim_threshold = 1  # Adjust the threshold as needed
+        ssim_threshold = 0.9  # Adjust the threshold as needed
 
         if ssim_value > ssim_threshold:
             # Continue with defect assessment
