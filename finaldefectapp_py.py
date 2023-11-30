@@ -14,9 +14,15 @@ def calculate_ssim(img_path, reference_image_paths):
 
     img_array = np.array(img)
     
-    ssim_values = [ssim(img_array, np.array(Image.open(reference_img).convert('L'))) for reference_img in reference_image_paths]
+    ssim_values = []
+    for reference_img in reference_image_paths:
+        try:
+            reference_img_array = np.array(Image.open(reference_img).convert('L'))
+            ssim_values.append(ssim(img_array, reference_img_array))
+        except Exception as e:
+            st.warning(f"Error calculating SSIM for {reference_img}: {str(e)}")
 
-    return max(ssim_values)  # Choose the maximum SSIM value among all reference images
+    return max(ssim_values) if ssim_values else 0  # Choose the maximum SSIM value if available, otherwise return 0
 
 # Function to load the trained MobileNet model
 def load_mobilenet_model():
