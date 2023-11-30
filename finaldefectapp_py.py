@@ -70,6 +70,9 @@ def main():
             images_in_folder = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.lower().endswith('.jpg')]
             reference_image_paths.extend(images_in_folder[:5])  # Choose the first 5 images from each folder
 
+        # Print the paths of reference images
+        st.write(f"Reference Image Paths: {reference_image_paths}")
+
         # Calculate SSIM with the set of reference images
         ssim_value = calculate_ssim(uploaded_file, reference_image_paths)
 
