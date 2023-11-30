@@ -5,3 +5,7 @@ numpy
 matplotlib
 opencv-python
 mesa-utils
+mesa-common-dev
+libgl1-mesa-glx
+libglu1-mesa
+libsm-dev
