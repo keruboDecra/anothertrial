@@ -21,7 +21,7 @@ def calculate_ssim(img_path, reference_image_paths):
             st.write(f"SSIM with {reference_img}: {ssim_val}")
             ssim_values.append(ssim_val)
         except Exception as e:
-            st.warning(f"Error loading {reference_img}: {str(e)}")
+            st.warning(f"Error calculating SSIM for {reference_img}: {str(e)}")
 
     return max(ssim_values) if ssim_values else 0  # Choose the maximum SSIM value if available, otherwise return 0
 
@@ -64,8 +64,13 @@ def main():
         # Define the paths to reference images for each defect type
         dataset_directory = 'NEU Metal Surface Defects Data/train'
         defect_folders = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
-        reference_image_paths = [os.path.join(dataset_directory, defect_folder, f) for defect_folder in defect_folders for f in os.listdir(os.path.join(dataset_directory, defect_folder)) if f.endswith('.jpg')][:5]  # Choose the first 5 images from each folder
-
+        
+        reference_image_paths = []
+        for defect_folder in defect_folders:
+            folder_path = os.path.join(dataset_directory, defect_folder)
+            images_in_folder = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.jpg')]
+            reference_image_paths.extend(images_in_folder[:5])  # Choose the first 5 images from each folder
+        
         # Print reference image paths
         st.write(f"Reference Image Paths: {reference_image_paths}")
 
