@@ -63,7 +63,7 @@ def main():
         st.write(f"SSIM with the reference image: {ssim_value}")
 
         # Set a threshold for SSIM
-        ssim_threshold = 0.9  # Adjust the threshold as needed
+        ssim_threshold = 0.4  # Adjust the threshold as needed
 
         if ssim_value > ssim_threshold:
             # Continue with defect assessment
