@@ -4,4 +4,4 @@ keras
 numpy
 matplotlib
 
-
+scikit-image
