@@ -11,7 +11,6 @@ from PIL import Image
 # Function to calculate Structural Similarity Index (SSI)
 def calculate_ssim(img_path, reference_image_paths):
     img = Image.open(img_path).convert('L')  # Convert to grayscale
-    img = img.resize(Image.open(reference_image_paths[0]).size)  # Resize to match the dimensions of the first reference image
 
     img_array = np.array(img)
     
