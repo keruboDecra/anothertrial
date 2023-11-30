@@ -4,4 +4,3 @@ keras
 numpy
 matplotlib
 opencv-python-headless
-libgtk2.0-dev
