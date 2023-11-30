@@ -5,20 +5,24 @@ from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
-
-import cv2
+from PIL import Image
 
 # Function to check if the image contains metallic surfaces (example using color histogram)
 def contains_metallic_surface(image_path, threshold=0.3):
-    img = cv2.imread(image_path)
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img = Image.open(image_path)
     
+    # Convert to numpy array
+    img_array = np.array(img)
+
     # Assuming metallic surfaces have a characteristic color (adjust as needed)
     lower_metallic = np.array([0, 0, 150])
     upper_metallic = np.array([179, 50, 255])
     
-    mask = cv2.inRange(hsv, lower_metallic, upper_metallic)
-    metallic_ratio = cv2.countNonZero(mask) / (img.shape[0] * img.shape[1])
+    # Mask pixels that fall within the specified color range
+    mask = np.all((img_array >= lower_metallic) & (img_array <= upper_metallic), axis=-1)
+    
+    # Calculate the ratio of metallic pixels
+    metallic_ratio = np.sum(mask) / (img_array.shape[0] * img_array.shape[1])
 
     return metallic_ratio > threshold
 
