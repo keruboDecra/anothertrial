@@ -100,8 +100,6 @@ def main():
 
 # Define your classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
-# Print SSIM values for debugging
-st.write(f"SSIM values with the reference images: {ssim_values}")
 
 # Run the app
 if __name__ == '__main__':
