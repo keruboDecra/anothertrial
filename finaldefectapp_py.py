@@ -9,13 +9,13 @@ from skimage.metrics import structural_similarity as ssim
 from PIL import Image
 
 # Function to calculate Structural Similarity Index (SSI)
-def calculate_ssim(img_path, reference_images):
+def calculate_ssim(img_path, reference_image_paths):
     img = Image.open(img_path).convert('L')  # Convert to grayscale
-    img = img.resize(reference_images[0].size)  # Resize to match the dimensions of the first reference image
+    img = img.resize(Image.open(reference_image_paths[0]).size)  # Resize to match the dimensions of the first reference image
 
     img_array = np.array(img)
     
-    ssim_values = [ssim(img_array, np.array(reference_img.convert('L'))) for reference_img in reference_images]
+    ssim_values = [ssim(img_array, np.array(Image.open(reference_img).convert('L'))) for reference_img in reference_image_paths]
 
     return max(ssim_values)  # Choose the maximum SSIM value among all reference images
 
@@ -52,15 +52,17 @@ def main():
     st.title("Defects Assessment App")
 
     # Upload image through Streamlit
-    uploaded_file = st.file_uploader("Choose an image...", type="jpg")
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "bmp"])
+
 
     if uploaded_file is not None:
-        # Choose a set of reference images from your dataset
-        dataset_directory = 'path/to/your/dataset'
-        reference_images = [Image.open(os.path.join(dataset_directory, filename)).convert('L') for filename in os.listdir(dataset_directory) if filename.endswith('.jpg')]
+        # Define the paths to reference images for each defect type
+        dataset_directory = 'NEU Metal Surface Defects Data/train'
+        defect_folders = ['Crazing', 'Incfdatserlusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
+        reference_image_paths = [os.path.join(dataset_directory, defect_folder, f) for defect_folder in defect_folders for f in os.listdir(os.path.join(dataset_directory, defect_folder)) if f.endswith('.jpg')][:5]  # Choose the first 5 images from each folder
 
         # Calculate SSIM with the set of reference images
-        ssim_value = calculate_ssim(uploaded_file, reference_images)
+        ssim_value = calculate_ssim(uploaded_file, reference_image_paths)
 
         st.write(f"Maximum SSIM with the reference images: {ssim_value}")
 
