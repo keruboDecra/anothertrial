@@ -5,6 +5,21 @@ from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
+import cv2
+
+# Function to check if the image contains metallic surfaces (example using color histogram)
+def contains_metallic_surface(image_path, threshold=0.3):
+    img = cv2.imread(image_path)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    
+    # Assuming metallic surfaces have a characteristic color (adjust as needed)
+    lower_metallic = np.array([0, 0, 150])
+    upper_metallic = np.array([179, 50, 255])
+    
+    mask = cv2.inRange(hsv, lower_metallic, upper_metallic)
+    metallic_ratio = cv2.countNonZero(mask) / (img.shape[0] * img.shape[1])
+
+    return metallic_ratio > threshold
 
 # Function to load the trained MobileNet model
 def load_mobilenet_model():
@@ -40,8 +55,6 @@ def main():
     uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 
     if uploaded_file is not None:
-        st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
-
         # Create a temporary directory if it doesn't exist
         temp_dir = 'temp'
         os.makedirs(temp_dir, exist_ok=True)
@@ -52,27 +65,27 @@ def main():
         with open(temp_path, 'wb') as f:
             f.write(uploaded_file.read())
 
-        # Load the model
-        model = load_mobilenet_model()
+        # Check if the image contains metallic surfaces
+        if contains_metallic_surface(temp_path):
+            # Load the defect assessment model
+            model = load_mobilenet_model()
 
-        if model is not None:
-            # Make predictions
-            prediction = predict_defect(temp_path, model)
+            if model is not None:
+                # Make predictions for defects
+                prediction = predict_defect(temp_path, model)
 
-            # Display the results
-            st.subheader("Prediction Results:")
-            for i, class_name in enumerate(classes):
-                st.write(f"{class_name}: {prediction[0][i]}")
+                # Display the results
+                st.subheader("Prediction Results:")
+                for i, class_name in enumerate(classes):
+                    st.write(f"{class_name}: {prediction[0][i]}")
 
-            # Assess the highest probability predicted and print out the class
-            max_prob_class = assess_defect(prediction[0], classes)
-            st.success(f"This metal surface has a defect of: {max_prob_class}")
-
-            # Set a threshold for alerting
-            threshold = 0.95 # Set your chosen threshold
-            max_prob = max(prediction[0])
-            if max_prob < threshold:
-                st.warning("No relevant defect found. Please check the image again.")
+                # Assess the highest probability predicted and print out the class
+                max_prob_class = assess_defect(prediction[0], classes)
+                st.success(f"This metal surface has a defect of: {max_prob_class}")
+            else:
+                st.error("Defect assessment model not loaded.")
+        else:
+            st.warning("The uploaded image does not appear to contain metallic surfaces.")
 
 # Define your classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
