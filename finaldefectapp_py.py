@@ -3,23 +3,21 @@ import streamlit as st
 import os
 from pathlib import Path
 from keras.preprocessing import image
-from keras.models import load_model  # Import load_model
+from keras.models import load_model
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
 from PIL import Image
 
 # Function to calculate Structural Similarity Index (SSI)
-def calculate_ssim(img_path, reference_img_path):
+def calculate_ssim(img_path, reference_images):
     img = Image.open(img_path).convert('L')  # Convert to grayscale
-    reference_img = Image.open(reference_img_path).convert('L')
-
-    # Resize the reference image to match the dimensions of the uploaded image
-    img = img.resize(reference_img.size)
+    img = img.resize(reference_images[0].size)  # Resize to match the dimensions of the first reference image
 
     img_array = np.array(img)
-    reference_img_array = np.array(reference_img)
+    
+    ssim_values = [ssim(img_array, np.array(reference_img.convert('L'))) for reference_img in reference_images]
 
-    return ssim(img_array, reference_img_array)
+    return max(ssim_values)  # Choose the maximum SSIM value among all reference images
 
 # Function to load the trained MobileNet model
 def load_mobilenet_model():
@@ -57,11 +55,14 @@ def main():
     uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 
     if uploaded_file is not None:
-        # Calculate SSIM with the reference image (inclusion.jpg)
-        reference_image_path = 'inclusion.jpg'
-        ssim_value = calculate_ssim(uploaded_file, reference_image_path)
+        # Choose a set of reference images from your dataset
+        dataset_directory = 'path/to/your/dataset'
+        reference_images = [Image.open(os.path.join(dataset_directory, filename)).convert('L') for filename in os.listdir(dataset_directory) if filename.endswith('.jpg')]
 
-        st.write(f"SSIM with the reference image: {ssim_value}")
+        # Calculate SSIM with the set of reference images
+        ssim_value = calculate_ssim(uploaded_file, reference_images)
+
+        st.write(f"Maximum SSIM with the reference images: {ssim_value}")
 
         # Set a threshold for SSIM
         ssim_threshold = 0.3
