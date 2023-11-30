@@ -25,18 +25,18 @@ def preprocess_image(image_path, target_size=(150, 150)):
     return img_array
 
 # Function to calculate Structural Similarity Index (SSI)
-def calculate_ssim(reference_image, uploaded_image):
+def calculate_ssim(reference_image, uploaded_image_path):
     # Read the reference image
     reference_img = io.imread(reference_image)
     
     # Convert images to grayscale
     reference_gray = color.rgb2gray(reference_img)
     
-    # Resize the uploaded image to match the reference image dimensions
-    uploaded_image_resized = transform.resize(uploaded_image, reference_img.shape[:2], mode='constant')
+    # Read the uploaded image and resize it to match the reference image dimensions
+    uploaded_img = preprocess_image(uploaded_image_path, target_size=reference_img.shape[:2])
     
     # Convert the resized image to grayscale
-    uploaded_gray = color.rgb2gray(uploaded_image_resized)
+    uploaded_gray = color.rgb2gray(uploaded_img[0])
     
     # Calculate SSIM
     index, _ = ssim(reference_gray, uploaded_gray, full=True)
@@ -70,11 +70,8 @@ def main():
         # Reference image for SSI
         reference_image = 'inclusion.jpg'
 
-        # Load the uploaded image and preprocess it
-        uploaded_image = preprocess_image(temp_path)
-
         # Calculate SSIM
-        ssim_index = calculate_ssim(reference_image, uploaded_image)
+        ssim_index = calculate_ssim(reference_image, temp_path)
 
         # Set a threshold for SSIM
         ssim_threshold = 0.7  # Adjust the threshold as needed
