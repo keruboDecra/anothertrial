@@ -58,7 +58,7 @@ def main():
     if uploaded_file is not None:
         # Define the paths to reference images for each defect type
         dataset_directory = 'NEU Metal Surface Defects Data/train'
-        defect_folders = ['Crazing', 'Incfdatserlusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
+        defect_folders = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
         reference_image_paths = [os.path.join(dataset_directory, defect_folder, f) for defect_folder in defect_folders for f in os.listdir(os.path.join(dataset_directory, defect_folder)) if f.endswith('.jpg')][:5]  # Choose the first 5 images from each folder
 
         # Calculate SSIM with the set of reference images
