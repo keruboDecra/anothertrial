@@ -1,6 +1,5 @@
 # Importing necessary libraries
 import streamlit as st
-import os
 from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
