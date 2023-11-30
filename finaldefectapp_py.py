@@ -1,32 +1,32 @@
 # Importing necessary libraries
 import streamlit as st
+import os
 from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
-import os
-from keras.models import load_model
-from PIL import Image
+from keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
 
-# Function to check if the image contains metallic surfaces (example using color histogram)
-def contains_metallic_surface(image_path, threshold=0.3):
-    img = Image.open(image_path)
-    
-    # Convert to numpy array
-    img_array = np.array(img)
+# Function to check if the image contains metallic surfaces using MobileNetV2
+def contains_metallic_surface(image_path, threshold=0.5):
+    model = MobileNetV2(weights='imagenet')
 
-    # Assuming metallic surfaces have a characteristic color (adjust as needed)
-    lower_metallic = np.array([0, 0, 150])
-    upper_metallic = np.array([179, 50, 255])
-    
-    # Mask pixels that fall within the specified color range
-    mask = np.all((img_array >= lower_metallic) & (img_array <= upper_metallic), axis=-1)
-    
-    # Calculate the ratio of metallic pixels
-    metallic_ratio = np.sum(mask) / (img_array.shape[0] * img_array.shape[1])
+    img = image.load_img(image_path, target_size=(224, 224))
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = preprocess_input(img_array)
 
-    return metallic_ratio > threshold
+    predictions = model.predict(img_array)
+    decoded_predictions = decode_predictions(predictions)
 
-# Function to load the trained MobileNet model
+    metallic_score = 0.0
+    for _, _, score in decoded_predictions[0]:
+        if 'metal' in _:
+            metallic_score = score
+            break
+
+    return metallic_score > threshold
+
+# Function to load the trained MobileNet model for defect assessment
 def load_mobilenet_model():
     model_path = 'mobilenet_model (1).h5'
 
@@ -37,7 +37,7 @@ def load_mobilenet_model():
         st.error(f"Error loading the model: {str(e)}")
         return None
 
-# Function to make predictions
+# Function to make predictions for defects
 def predict_defect(image_path, model):
     img = image.load_img(image_path, target_size=(150, 150))
     img_array = image.img_to_array(img)
