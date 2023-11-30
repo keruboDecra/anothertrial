@@ -6,7 +6,7 @@ from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
 from skimage.metrics import structural_similarity as ssim
-from skimage import io, color
+from skimage import io, color, transform
 
 # Function to load the trained MobileNet model
 def load_mobilenet_model(model_path):
@@ -17,17 +17,26 @@ def load_mobilenet_model(model_path):
         st.error(f"Error loading the model: {str(e)}")
         return None
 
+# Function to preprocess images and resize them
+def preprocess_image(image_path, target_size=(150, 150)):
+    img = image.load_img(image_path, target_size=target_size)
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0
+    return img_array
+
 # Function to calculate Structural Similarity Index (SSI)
-def calculate_ssim(reference_image, image_path):
+def calculate_ssim(reference_image, uploaded_image):
     # Read the reference image
     reference_img = io.imread(reference_image)
     
-    # Read the uploaded image
-    uploaded_img = io.imread(image_path)
-    
     # Convert images to grayscale
     reference_gray = color.rgb2gray(reference_img)
-    uploaded_gray = color.rgb2gray(uploaded_img)
+    
+    # Resize the uploaded image to match the reference image dimensions
+    uploaded_image_resized = transform.resize(uploaded_image, reference_img.shape[:2], mode='constant')
+    
+    # Convert the resized image to grayscale
+    uploaded_gray = color.rgb2gray(uploaded_image_resized)
     
     # Calculate SSIM
     index, _ = ssim(reference_gray, uploaded_gray, full=True)
@@ -61,8 +70,11 @@ def main():
         # Reference image for SSI
         reference_image = 'inclusion.jpg'
 
+        # Load the uploaded image and preprocess it
+        uploaded_image = preprocess_image(temp_path)
+
         # Calculate SSIM
-        ssim_index = calculate_ssim(reference_image, temp_path)
+        ssim_index = calculate_ssim(reference_image, uploaded_image)
 
         # Set a threshold for SSIM
         ssim_threshold = 0.7  # Adjust the threshold as needed
