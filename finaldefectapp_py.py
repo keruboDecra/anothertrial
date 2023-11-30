@@ -72,7 +72,7 @@ def main():
         st.write(f"Maximum SSIM with the reference images: {ssim_value}")
 
         # Set a threshold for SSIM
-        ssim_threshold = 0.3
+        ssim_threshold = 0.03
 
         if ssim_value >= ssim_threshold:
             # Continue with defect assessment
@@ -100,6 +100,8 @@ def main():
 
 # Define your classes
 classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
+# Print SSIM values for debugging
+st.write(f"SSIM values with the reference images: {ssim_values}")
 
 # Run the app
 if __name__ == '__main__':
