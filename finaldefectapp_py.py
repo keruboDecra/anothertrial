@@ -5,6 +5,8 @@ from pathlib import Path
 from keras.preprocessing import image
 import numpy as np
 from keras.models import load_model
+import cv2
+
 
 # Function to check if the image contains metallic surfaces (example using color histogram)
 def contains_metallic_surface(image_path, threshold=0.3):
