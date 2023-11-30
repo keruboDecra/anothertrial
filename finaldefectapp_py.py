@@ -30,7 +30,9 @@ def load_mobilenet_model():
 
 # Function to make predictions
 def predict_defect(image_path, model):
-    img = image.load_img(image_path, target_size=(150, 150))
+    # Resize the image to match the expected input size of the model
+    target_size = (150, 150)
+    img = image.load_img(image_path, target_size=target_size)
     img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0) / 255.0
 
