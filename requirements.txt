@@ -3,5 +3,6 @@ tensorflow
 keras
 numpy
 matplotlib
-streamlit-opencv-headless
-opencv-python
+opencv-python-headless
+
+
