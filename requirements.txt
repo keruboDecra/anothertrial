@@ -4,4 +4,3 @@ keras
 numpy
 matplotlib
 opencv-python
-libgl1-mesa-glx
