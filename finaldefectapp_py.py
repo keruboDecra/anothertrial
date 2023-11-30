@@ -61,7 +61,7 @@ def main():
 
     if uploaded_file is not None:
         # Define the paths to reference images for each defect type
-        dataset_directory = 'anothertrial/NEU Metal Surface Defects Data/train'
+        dataset_directory = 'NEU Metal Surface Defects Data/train'
 
         defect_folders = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
 
