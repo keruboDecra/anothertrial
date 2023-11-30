@@ -59,7 +59,7 @@ def main():
             f.write(uploaded_file.read())
 
         # Reference image for SSI
-        reference_image = 'rusty_metal.jpg'
+        reference_image = 'inclusion.jpg'
 
         # Calculate SSIM
         ssim_index = calculate_ssim(reference_image, temp_path)
