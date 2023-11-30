@@ -3,5 +3,5 @@ tensorflow
 keras
 numpy
 matplotlib
-opencv-python-headless
-streamlit-opencv-headless
+streamlit-opencv-headless==0.0.3
+opencv-python==4.5.3
