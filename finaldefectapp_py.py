@@ -58,7 +58,7 @@ def main():
 
     if uploaded_file is not None:
         # Calculate SSIM with the reference image (inclusion.jpg)
-        reference_image_path = 'rusty metal.jpg'
+        reference_image_path = 'inclusion.jpg'
         ssim_value = calculate_ssim(uploaded_file, reference_image_path)
 
         st.write(f"SSIM with the reference image: {ssim_value}")
