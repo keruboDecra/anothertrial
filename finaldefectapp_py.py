@@ -32,13 +32,14 @@ def predict_metal_and_defect(image_path):
         defect_img_array = np.expand_dims(defect_img_array, axis=0)
         defect_img_array /= 255.0
 
-        # Predict defect class
+        # Predict defect class and probability scores
         defect_prediction = defect_prediction_model.predict(defect_img_array)
         defect_class = np.argmax(defect_prediction)
+        defect_probabilities = defect_prediction[0]
 
-        return "Metal", defect_class
+        return "Metal", defect_class, defect_probabilities
     else:
-        return "Non-Metal", None
+        return "Non-Metal", None, None
 
 # Load the models
 metal_classification_model = load_model('classifyWaste.h5')
@@ -64,10 +65,15 @@ if uploaded_file is not None:
     st.write("Classifying...")
 
     # Get predictions
-    metal_label, defect_label = predict_metal_and_defect(uploaded_file)
+    metal_label, defect_label, defect_probabilities = predict_metal_and_defect(uploaded_file)
 
     # Display results
     st.write(f"Metal Classification: {metal_label}")
     if metal_label == "Metal" and defect_label is not None:
         defect_class_name = defect_class_names.get(defect_label, "Unknown")
         st.write(f"Defect Classification: {defect_class_name}")
+
+        # Display probability scores
+        st.write("Defect Probability Scores:")
+        for i, prob in enumerate(defect_probabilities):
+            st.write(f"{defect_class_names[i]}: {prob:.4f}")
