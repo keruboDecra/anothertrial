@@ -23,7 +23,7 @@ def predict_metal_and_defect(image_path):
     metal_prediction = metal_classification_model.predict(metal_img_array)
 
     # Check if it's a metal
-    is_metal = metal_prediction[0][0] > 3  # Adjust the threshold if needed
+    is_metal = metal_prediction[0][0] > 0.1  # Adjust the threshold if needed
 
     if is_metal:
         # Resize the image for defect prediction
