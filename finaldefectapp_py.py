@@ -32,7 +32,7 @@ def predict_metal_and_defect(image_path):
         defect_img_array = np.expand_dims(defect_img_array, axis=0)
         defect_img_array /= 255.0
 
-        # Predict defect class and probability scores
+        # Predict defect class with probability scores
         defect_prediction = defect_prediction_model.predict(defect_img_array)
         defect_class = np.argmax(defect_prediction)
         defect_probabilities = defect_prediction[0]
@@ -72,8 +72,6 @@ if uploaded_file is not None:
     if metal_label == "Metal" and defect_label is not None:
         defect_class_name = defect_class_names.get(defect_label, "Unknown")
         st.write(f"Defect Classification: {defect_class_name}")
-
-        # Display probability scores
-        st.write("Defect Probability Scores:")
+        st.write("Defect Probabilities:")
         for i, prob in enumerate(defect_probabilities):
             st.write(f"{defect_class_names[i]}: {prob:.4f}")
