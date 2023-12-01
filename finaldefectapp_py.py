@@ -4,10 +4,10 @@ from keras.preprocessing import image
 import numpy as np
 
 # Load the metal classification model
-metal_classification_model = load_model('/content/drive/My Drive/defect model/classifyWaste.h5')
+metal_classification_model = load_model('classifyWaste.h5')
 
 # Load the MobileNet defect prediction model
-defect_prediction_model = load_model('/content/drive/My Drive/defect model/mobilenet_model.h5')
+defect_prediction_model = load_model('mobilenet_model.h5')
 
 # Function to predict metal and defect
 def predict_metal_and_defect(image_path):
