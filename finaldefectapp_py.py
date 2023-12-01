@@ -16,7 +16,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 metal_model = load_model('classifyWaste.h5')
 
 # Load the metal defect prediction model
-defect_model = load_model('mobilenet_model.h5')
+defect_model = load_model('mobilenet_model(1).h5')
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
