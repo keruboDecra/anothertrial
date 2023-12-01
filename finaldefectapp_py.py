@@ -1,77 +1,61 @@
-import os
-import numpy as np
-from PIL import Image
-from keras.preprocessing import image
-from keras.models import load_model
 import streamlit as st
+from keras.models import load_model
+from keras.preprocessing import image
+import numpy as np
 
-# Function to resize an image
-def resize_image(image_path, target_size=(150, 150)):
-    img = Image.open(image_path)
-    img = img.resize(target_size)
-    return img
-
-# Function to predict metal and defect
-def predict_metal_and_defect(image_path, metal_model, defect_model):
-    # Resize the image for metal classification
-    metal_img = resize_image(image_path, target_size=(224, 224))
-    metal_img_array = image.img_to_array(metal_img)
-    metal_img_array = np.expand_dims(metal_img_array, axis=0)
-    metal_img_array /= 255.0
-
-    # Predict metal class
-    metal_prediction = metal_model.predict(metal_img_array)
-
-    # Check if it's a metal
-    is_metal = metal_prediction[0][0] > 0.5  # Adjust the threshold if needed
-
-    if is_metal:
-        # Resize the image for defect prediction
-        defect_img = resize_image(image_path, target_size=(150, 150))
-        defect_img_array = image.img_to_array(defect_img)
-        defect_img_array = np.expand_dims(defect_img_array, axis=0)
-        defect_img_array /= 255.0
-
-        # Predict defect class with probability scores
-        defect_prediction = defect_model.predict(defect_img_array)
-        defect_class = np.argmax(defect_prediction)
-        defect_probabilities = defect_prediction[0]
-
-        return "Metal", defect_class, defect_probabilities
-    else:
-        return "Non-Metal", None, None
-
-# Streamlit app
-st.title("Defects Assessment App")
-
-# Load the models
+# Load your models
 metal_classification_model = load_model('classifymaterial.h5')
 defect_prediction_model = load_model('mobilenet_model (1).h5')
 
-# Defect class names mapping
-defect_class_names = {
-    0: "Pitted",
-    1: "Inclusion",
-    2: "Crazing",
-    3: "Patches",
-    4: "Scratches",
-    5: "Rolled"
-}
+# Class labels for metal classification
+metal_classes = ['plastic', 'paper', 'organic', 'metal', 'light blubs', 'glass', 'e-waste', 'clothes', 'batteries']
 
-uploaded_file = st.file_uploader("Choose an image...", type="jpg")
-if uploaded_file is not None:
-    st.image(uploaded_file, caption="Uploaded Image.", use_column_width=True)
-    st.write("")
-    st.write("Classifying...")
+# Class labels for defect prediction
+defect_classes = ['Pitted', 'Inclusion', 'Crazing', 'Patches', 'Scratches', 'Rolled']
 
-    # Get predictions
-    metal_label, defect_label, defect_probabilities = predict_metal_and_defect(uploaded_file, metal_classification_model, defect_prediction_model)
+def resize_image(img_path, target_size=(224, 224)):
+    img = image.load_img(img_path, target_size=target_size)
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    return img_array / 255.0
 
-    # Display results
-    st.write(f"Metal Classification: {metal_label}")
-    if metal_label == "Metal" and defect_label is not None:
-        defect_class_name = defect_class_names.get(defect_label, "Unknown")
-        st.write(f"Defect Classification: {defect_class_name}")
-        st.write("Defect Probabilities:")
-        for i, prob in enumerate(defect_probabilities):
-            st.write(f"{defect_class_names[i]}: {prob:.4f}")
+
+def metal_classification(img_array):
+    metal_probs = metal_classification_model.predict(img_array)[0]
+    metal_class = metal_classes[np.argmax(metal_probs)]
+    return metal_class, metal_probs
+
+def defect_prediction(img_array):
+    defect_probs = defect_prediction_model.predict(img_array)[0]
+    defect_class = defect_classes[np.argmax(defect_probs)]
+    return defect_class, defect_probs
+
+def main():
+    st.title("Defects Assessment App")
+
+    uploaded_file = st.file_uploader("Choose an image...", type="jpg")
+
+    if uploaded_file is not None:
+        st.image(uploaded_file, caption="Uploaded Image.", use_column_width=True)
+
+        img_array = resize_image(uploaded_file)
+
+        # Metal classification
+        metal_class, metal_probs = metal_classification(img_array)
+
+        if metal_class == 'metal':
+            st.subheader("Metal Classification:")
+            st.write(f"The uploaded image belongs to the class: {metal_class}")
+            st.bar_chart({metal_classes[i]: metal_probs[i] for i in range(len(metal_classes))})
+
+            # Defect prediction
+            defect_class, defect_probs = defect_prediction(img_array)
+            st.subheader("Defect Prediction:")
+            st.write(f"The predicted defect class is: {defect_class}")
+            st.bar_chart({defect_classes[i]: defect_probs[i] for i in range(len(defect_classes))})
+        else:
+            st.subheader("Metal Classification:")
+            st.warning(f"The uploaded image does not belong to the metal class. Please upload a metal image.")
+
+if __name__ == "__main__":
+    main()
