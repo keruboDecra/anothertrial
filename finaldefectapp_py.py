@@ -6,7 +6,7 @@ from keras.models import load_model
 import streamlit as st
 
 # Function to resize an image
-def resize_image(image_path, target_size=(224, 224)):
+def resize_image(image_path, target_size=(150, 150)):
     img = Image.open(image_path)
     img = img.resize(target_size)
     return img
