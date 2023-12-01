@@ -12,7 +12,7 @@ def resize_image(image_path, target_size=(224, 224)):
     return img
 
 # Function to predict metal and defect
-def predict_metal_and_defect(image_path):
+def predict_metal_and_defect(image_path, metal_model, defect_model):
     # Resize the image for metal classification
     metal_img = resize_image(image_path, target_size=(224, 224))
     metal_img_array = image.img_to_array(metal_img)
@@ -20,10 +20,10 @@ def predict_metal_and_defect(image_path):
     metal_img_array /= 255.0
 
     # Predict metal class
-    metal_prediction = metal_classification_model.predict(metal_img_array)
+    metal_prediction = metal_model.predict(metal_img_array)
 
     # Check if it's a metal
-    is_metal = metal_prediction[0][0] > 0.1  # Adjust the threshold if needed
+    is_metal = metal_prediction[0][0] > 0.5  # Adjust the threshold if needed
 
     if is_metal:
         # Resize the image for defect prediction
@@ -33,13 +33,16 @@ def predict_metal_and_defect(image_path):
         defect_img_array /= 255.0
 
         # Predict defect class with probability scores
-        defect_prediction = defect_prediction_model.predict(defect_img_array)
+        defect_prediction = defect_model.predict(defect_img_array)
         defect_class = np.argmax(defect_prediction)
         defect_probabilities = defect_prediction[0]
 
         return "Metal", defect_class, defect_probabilities
     else:
         return "Non-Metal", None, None
+
+# Streamlit app
+st.title("Defects Assessment App")
 
 # Load the models
 metal_classification_model = load_model('classifymaterial.h5')
@@ -55,9 +58,6 @@ defect_class_names = {
     5: "Rolled"
 }
 
-# Streamlit app
-st.title("Defects Assessment App")
-
 uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 if uploaded_file is not None:
     st.image(uploaded_file, caption="Uploaded Image.", use_column_width=True)
@@ -65,7 +65,7 @@ if uploaded_file is not None:
     st.write("Classifying...")
 
     # Get predictions
-    metal_label, defect_label, defect_probabilities = predict_metal_and_defect(uploaded_file)
+    metal_label, defect_label, defect_probabilities = predict_metal_and_defect(uploaded_file, metal_classification_model, defect_prediction_model)
 
     # Display results
     st.write(f"Metal Classification: {metal_label}")
