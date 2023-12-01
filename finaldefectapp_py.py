@@ -7,7 +7,7 @@ import numpy as np
 metal_classification_model = load_model('classifyWaste.h5')
 
 # Load the MobileNet defect prediction model
-defect_prediction_model = load_model('mobilenet_model.h5')
+defect_prediction_model = load_model('mobilenet_model (1).h5')
 
 # Function to predict metal and defect
 def predict_metal_and_defect(image_path):
