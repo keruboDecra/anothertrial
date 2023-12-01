@@ -1,114 +1,77 @@
-# Importing necessary libraries
-import streamlit as st
 import os
-from pathlib import Path
+import numpy as np
+from PIL import Image
 from keras.preprocessing import image
 from keras.models import load_model
-import numpy as np
-from skimage.metrics import structural_similarity as ssim
-from PIL import Image
+import streamlit as st
 
-# Function to calculate Structural Similarity Index (SSI)
-def calculate_ssim(img_path, reference_image_paths):
-    img = Image.open(img_path).convert('L')  # Convert to grayscale
+# Function to resize an image
+def resize_image(image_path, target_size=(224, 224)):
+    img = Image.open(image_path)
+    img = img.resize(target_size)
+    return img
 
-    img_array = np.array(img)
+# Function to predict metal and defect
+def predict_metal_and_defect(image_path):
+    # Resize the image for metal classification
+    metal_img = resize_image(image_path, target_size=(224, 224))
+    metal_img_array = image.img_to_array(metal_img)
+    metal_img_array = np.expand_dims(metal_img_array, axis=0)
+    metal_img_array /= 255.0
 
-    ssim_values = []
-    for reference_img in reference_image_paths:
-        try:
-            reference_img_array = np.array(Image.open(reference_img).convert('L'))
-            ssim_values.append(ssim(img_array, reference_img_array))
-        except Exception as e:
-            st.warning(f"Error calculating SSIM for {reference_img}: {str(e)}")
+    # Predict metal class
+    metal_prediction = metal_classification_model.predict(metal_img_array)
 
-    return max(ssim_values) if ssim_values else 0  # Choose the maximum SSIM value if available, otherwise return 0
+    # Check if it's a metal
+    is_metal = metal_prediction[0][0] > 0.5  # Adjust the threshold if needed
 
-# Function to load the trained MobileNet model
-def load_mobilenet_model():
-    model_path = 'mobilenet_model (1).h5'
+    if is_metal:
+        # Resize the image for defect prediction
+        defect_img = resize_image(image_path, target_size=(150, 150))
+        defect_img_array = image.img_to_array(defect_img)
+        defect_img_array = np.expand_dims(defect_img_array, axis=0)
+        defect_img_array /= 255.0
 
-    try:
-        model = load_model(model_path)
-        return model
-    except Exception as e:
-        st.error(f"Error loading the model: {str(e)}")
-        return None
+        # Predict defect class with probability scores
+        defect_prediction = defect_prediction_model.predict(defect_img_array)
+        defect_class = np.argmax(defect_prediction)
+        defect_probabilities = defect_prediction[0]
 
-# Function to make predictions
-def predict_defect(image_path, model):
-    # Resize the image to match the expected input size of the model
-    target_size = (150, 150)
-    img = image.load_img(image_path, target_size=target_size)
-    img_array = image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0) / 255.0
+        return "Metal", defect_class, defect_probabilities
+    else:
+        return "Non-Metal", None, None
 
-    prediction = model.predict(img_array)
-    return prediction
+# Load the models
+metal_classification_model = load_model('classifyWaste.h5')
+defect_prediction_model = load_model('mobilenet_model (1).h5')
 
-# Function to assess the highest probability predicted and print out the class of the image
-def assess_defect(prediction, classes):
-    max_prob_index = np.argmax(prediction)
-    max_prob_class = classes[max_prob_index]
-    return max_prob_class
+# Defect class names mapping
+defect_class_names = {
+    0: "Pitted",
+    1: "Inclusion",
+    2: "Crazing",
+    3: "Patches",
+    4: "Scratches",
+    5: "Rolled"
+}
 
-# Streamlit App
-def main():
-    st.title("Defects Assessment App")
+# Streamlit app
+st.title("Defects Assessment App")
 
-    # Upload image through Streamlit
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "bmp"])
+uploaded_file = st.file_uploader("Choose an image...", type="jpg")
+if uploaded_file is not None:
+    st.image(uploaded_file, caption="Uploaded Image.", use_column_width=True)
+    st.write("")
+    st.write("Classifying...")
 
-    if uploaded_file is not None:
-        # Define the paths to reference images for each defect type
-        dataset_directory = 'NEU Metal Surface Defects Data/train'
+    # Get predictions
+    metal_label, defect_label, defect_probabilities = predict_metal_and_defect(uploaded_file)
 
-        defect_folders = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
-
-        reference_image_paths = []
-        for defect_folder in defect_folders:
-            folder_path = os.path.join(dataset_directory, defect_folder)
-            images_in_folder = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.lower().endswith('.jpg')]
-            reference_image_paths.extend(images_in_folder[:5])  # Choose the first 5 images from each folder
-
-        # Print the paths of reference images
-        st.write(f"Reference Image Paths: {reference_image_paths}")
-
-        # Calculate SSIM with the set of reference images
-        ssim_value = calculate_ssim(uploaded_file, reference_image_paths)
-
-        st.write(f"Maximum SSIM with the reference images: {ssim_value}")
-
-        # Set a threshold for SSIM
-        ssim_threshold = 0.1
-
-        if ssim_value >= ssim_threshold:
-            # Continue with defect assessment
-
-            # Load the model only if the SSIM condition is met
-            model = load_mobilenet_model()
-
-            if model is not None:
-                # Make predictions
-                prediction = predict_defect(uploaded_file, model)
-
-                # Display the results
-                st.subheader("Prediction Results:")
-                for i, class_name in enumerate(classes):
-                    st.write(f"{class_name}: {prediction[0][i]}")
-
-                # Assess the highest probability predicted and print out the class
-                max_prob_class = assess_defect(prediction[0], classes)
-                st.success(f"This metal surface has a defect of: {max_prob_class}")
-
-            else:
-                st.error("Defect assessment model not loaded.")
-        else:
-            st.warning("The uploaded image does not appear to contain a metallic surface.")
-
-# Define your classes
-classes = ['Crazing', 'Inclusion', 'Patches', 'Pitted', 'Rolled', 'Scratches']
-
-# Run the app
-if __name__ == '__main__':
-    main()
+    # Display results
+    st.write(f"Metal Classification: {metal_label}")
+    if metal_label == "Metal" and defect_label is not None:
+        defect_class_name = defect_class_names.get(defect_label, "Unknown")
+        st.write(f"Defect Classification: {defect_class_name}")
+        st.write("Defect Probabilities:")
+        for i, prob in enumerate(defect_probabilities):
+            st.write(f"{defect_class_names[i]}: {prob:.4f}")
