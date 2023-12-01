@@ -21,7 +21,6 @@ def predict_metal_and_defect(image_path):
 
     # Predict metal class
     metal_prediction = metal_classification_model.predict(metal_img_array)
-    print("Metal Prediction Probabilities:", metal_prediction)
 
     # Check if it's a metal
     is_metal = metal_prediction[0][0] > 0.5  # Adjust the threshold if needed
@@ -45,6 +44,16 @@ def predict_metal_and_defect(image_path):
 metal_classification_model = load_model('classifyWaste.h5')
 defect_prediction_model = load_model('mobilenet_model (1).h5')
 
+# Defect class names mapping
+defect_class_names = {
+    0: "Pitted",
+    1: "Inclusion",
+    2: "Crazing",
+    3: "Patches",
+    4: "Scratches",
+    5: "Rolled"
+}
+
 # Streamlit app
 st.title("Defects Assessment App")
 
@@ -60,4 +69,5 @@ if uploaded_file is not None:
     # Display results
     st.write(f"Metal Classification: {metal_label}")
     if metal_label == "Metal" and defect_label is not None:
-        st.write(f"Defect Classification: Class {defect_label}")
+        defect_class_name = defect_class_names.get(defect_label, "Unknown")
+        st.write(f"Defect Classification: {defect_class_name}")
