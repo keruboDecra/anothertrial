@@ -42,7 +42,7 @@ def predict_metal_and_defect(image_path):
         return "Non-Metal", None, None
 
 # Load the models
-metal_classification_model = load_model('classifyWaste.h5')
+metal_classification_model = load_model('classifymaterial.h5')
 defect_prediction_model = load_model('mobilenet_model (1).h5')
 
 # Defect class names mapping
