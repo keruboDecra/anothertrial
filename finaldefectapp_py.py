@@ -5,7 +5,7 @@ import numpy as np
 
 # Load your models
 metal_classification_model = load_model('classifymaterial.h5')
-defect_prediction_model = load_model('mobilenet_model.h5')
+defect_prediction_model = load_model('mobilenet_model (1).h5')
 
 # Class labels for metal classification
 metal_classes = ['plastic', 'paper', 'organic', 'metal', 'light blubs', 'glass', 'e-waste', 'clothes', 'batteries']
